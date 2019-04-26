@@ -1,0 +1,10 @@
+BEGIN
+  FOR i IN 1..1000 LOOP
+    INSERT INTO MSG_DATA (
+      MSG_ID, MSG_STATUS, VENDOR_ID
+    ) VALUES (
+      i, 1, 2
+    );
+  END LOOP;
+  COMMIT;
+END;

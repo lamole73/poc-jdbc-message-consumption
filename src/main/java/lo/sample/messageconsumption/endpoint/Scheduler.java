@@ -1,6 +1,7 @@
 package lo.sample.messageconsumption.endpoint;
 
 import lo.sample.messageconsumption.JDBCRepository;
+import lo.sample.messageconsumption.JDBCRepository2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,19 +16,19 @@ public class Scheduler {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     @Autowired
-    JDBCRepository repository;
+    JDBCRepository2 repository;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 1000)
     public void execute1() {
         logger.info("[thread: {}] execute1 START at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
-        repository.runIt();
+        repository.runIt("execute1");
         logger.info("[thread: {}] execute1 DONE  at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
     }
 
     @Scheduled(fixedRate = 5000)
     public void execute2() {
         logger.info("[thread: {}] execute2 START at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
-        repository.runIt();
+        repository.runIt("execute2");
         logger.info("[thread: {}] execute2 DONE  at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
     }
 }

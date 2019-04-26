@@ -9,10 +9,8 @@ import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -23,7 +21,7 @@ public class JDBCRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public void runIt() {
+    public void runIt(final String runningAppInstance) {
         List<Long> msgIds;
         try {
             msgIds = jdbcTemplate.queryForList("SELECT MSG_ID FROM MSG_DATA WHERE MSG_STATUS = 1", Long.class);
@@ -53,6 +51,7 @@ public class JDBCRepository {
                     @Override
                     public void processRow(ResultSet resultSet) throws SQLException {
                         try {
+                            logger.info("[thread: {}] Processing msgId={}", Thread.currentThread().getName(), msgId);
 //                            // Handle the processing logic to process the row with the row lock
 //                            if (!isValidToProcess(resultSet.getInt("VENDOR_ID"))) {     // Check whether it's possible candidate based on the vendor id
 //                                return;
@@ -63,6 +62,11 @@ public class JDBCRepository {
                             resultSet.updateInt("MSG_STATUS", 2);
                             resultSet.updateInt("VENDOR_ID", resultSet.getInt("VENDOR_ID")+1);
                             resultSet.updateString("PROC_CONTENT", Thread.currentThread().getName());
+                            resultSet.updateString("PROC_APP", runningAppInstance + " / thread=" + Thread.currentThread().getName());
+                            resultSet.updateTimestamp("PROC_TIME", Timestamp.from(Instant.now()));
+
+                            // TODO Just wait for testing
+                            Thread.sleep(1000);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -70,18 +74,17 @@ public class JDBCRepository {
                         } finally {
                             resultSet.updateInt("MSG_ID", resultSet.getInt("MSG_ID"));  // Mock update to make sure resultSet is always an updated one
                             resultSet.updateRow();  //flushing all the updates to the table and release the row lock
+                            logger.info("[thread: {}] Processed msgId={}", Thread.currentThread().getName(), msgId);
                         }
 
                     }
                 };
 
                 jdbcTemplate.setMaxRows(1);
+                logger.info("[thread: {}] Started msgId={}", Thread.currentThread().getName(), msgId);
                 jdbcTemplate.query(pscf.newPreparedStatementCreator(new Object[] {msgId}), rch);
                 // If processed 1 row break
-                logger.info("[thread: {}] Processed msgId={}", Thread.currentThread().getName(), msgId);
-
-                // TODO Just wait for testing
-                Thread.sleep(1000);
+                logger.info("[thread: {}] Ended msgId={}", Thread.currentThread().getName(), msgId);
 
                 break;
 
