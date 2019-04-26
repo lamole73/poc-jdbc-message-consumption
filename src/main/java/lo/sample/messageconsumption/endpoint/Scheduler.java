@@ -1,7 +1,5 @@
 package lo.sample.messageconsumption.endpoint;
 
-import lo.sample.messageconsumption.JDBCRepository;
-import lo.sample.messageconsumption.JDBCRepository2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +13,30 @@ public class Scheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
+    // Just uncomment whichever implementation you like.
+//    @Autowired
+//    lo.sample.messageconsumption.JDBCRepository2 repository;
     @Autowired
-    JDBCRepository2 repository;
+    lo.sample.messageconsumption.JDBCRepository3 repository;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 5000)
     public void execute1() {
-        logger.info("[thread: {}] execute1 START at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
+        logger.info("[{}] [thread: {}] START at time: {}", "execute1", Thread.currentThread().getName(), LocalDateTime.now());
         repository.runIt("execute1");
-        logger.info("[thread: {}] execute1 DONE  at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
+        logger.info("[{}] [thread: {}] DONE  at time: {}", "execute1", Thread.currentThread().getName(), LocalDateTime.now());
     }
 
     @Scheduled(fixedRate = 5000)
     public void execute2() {
-        logger.info("[thread: {}] execute2 START at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
+        logger.info("[{}] [thread: {}] START at time: {}", "execute2", Thread.currentThread().getName(), LocalDateTime.now());
         repository.runIt("execute2");
-        logger.info("[thread: {}] execute2 DONE  at time: {}", Thread.currentThread().getName(), LocalDateTime.now());
+        logger.info("[{}] [thread: {}] DONE  at time: {}", "execute2", Thread.currentThread().getName(), LocalDateTime.now());
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void execute3() {
+        logger.info("[{}] [thread: {}] START at time: {}", "execute3", Thread.currentThread().getName(), LocalDateTime.now());
+        repository.runIt("execute2");
+        logger.info("[{}] [thread: {}] DONE  at time: {}", "execute3", Thread.currentThread().getName(), LocalDateTime.now());
     }
 }
